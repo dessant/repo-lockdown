@@ -1,0 +1,57 @@
+{
+  "name": "repo-lockdown",
+  "version": "0.1.0",
+  "description": "A GitHub App built with Probot that closes and locks new and existing issues or pull requests.",
+  "author": "Armin Sebastian",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/dessant/repo-lockdown.git",
+    "type": "git"
+  },
+  "bugs": "https://github.com/dessant/repo-lockdown/issues",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "probot run ./src/index.js",
+    "watch": "nodemon --exec 'yarn run start'",
+    "update": "ncu --upgrade --upgradeAll && yarn",
+    "push": "git push --follow-tags origin master",
+    "release": "standard-version && yarn run push"
+  },
+  "files": [
+    "docs",
+    "src"
+  ],
+  "dependencies": {
+    "joi": "^14.3.1",
+    "lodash.uniqby": "^4.7.0",
+    "probot": "^7.5.0",
+    "probot-config": "^1.0.1",
+    "probot-messages": "^0.1.1",
+    "probot-scheduler": "probot/scheduler#75bc5dd3fcac5bf6448ce85c63d1e5c2971c11a8",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "1.18.9",
+    "npm-check-updates": "^2.15.0",
+    "prettier": "^1.15.3",
+    "smee-client": "^1.0.2",
+    "standard-version": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=8.12.0"
+  },
+  "keywords": [
+    "github",
+    "issues",
+    "pull requests",
+    "lock",
+    "close",
+    "fork",
+    "mirror",
+    "automation",
+    "github app",
+    "probot",
+    "probot app",
+    "bot"
+  ]
+}
