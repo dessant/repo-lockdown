@@ -136,7 +136,7 @@ module.exports = class Lockdown {
     }
 
     this.log.info({repo: {owner, repo}}, `Searching ${type}`);
-    const results = (await this.context.github.search.issues({
+    let results = (await this.context.github.search.issues({
       q: query + ' is:open',
       sort: 'updated',
       order: 'desc',
@@ -147,20 +147,23 @@ module.exports = class Lockdown {
     })).data.items;
 
     if (lock) {
-      results.push(
-        ...(await this.context.github.search.issues({
-          q: query + ' is:unlocked',
-          sort: 'updated',
-          order: 'desc',
-          per_page: 30,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
-        })).data.items
-      );
+      const unlockedIssues = (await this.context.github.search.issues({
+        q: query + ' is:unlocked',
+        sort: 'updated',
+        order: 'desc',
+        per_page: 30,
+        headers: {
+          Accept: 'application/vnd.github.sailor-v-preview+json'
+        }
+      })).data.items;
+
+      // `is:unlocked` search qualifier is undocumented, skip locked issues
+      results.push(...unlockedIssues.filter(issue => !issue.locked));
+
+      results = uniqBy(results, 'number');
     }
 
-    return uniqBy(results, 'number');
+    return results;
   }
 
   async ensureUnlock(issue, lock, action) {
