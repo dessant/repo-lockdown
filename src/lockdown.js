@@ -39,16 +39,15 @@ module.exports = class Lockdown {
 
     if (skipCreatedBefore) {
       const created = new Date(
-        (payload.issue || payload.pull_request).created_at.split('T')[0]
+        (payload.issue || payload.pull_request).created_at
       );
-      const skipBefore = new Date(skipCreatedBefore);
-      if (created.getTime() < skipBefore.getTime()) {
+      if (created.getTime() < skipCreatedBefore.getTime()) {
         return;
       }
     }
 
     if (comment) {
-      this.log.info(issue, 'Commenting');
+      this.log.info({issue}, 'Commenting');
       await github.issues.createComment({
         ...issue,
         body: comment
@@ -56,7 +55,7 @@ module.exports = class Lockdown {
     }
 
     if (label) {
-      this.log.info(issue, 'Labeling');
+      this.log.info({issue}, 'Labeling');
       await github.issues.addLabels({
         ...issue,
         labels: [label]
@@ -64,12 +63,12 @@ module.exports = class Lockdown {
     }
 
     if (close) {
-      this.log.info(issue, 'Closing');
+      this.log.info({issue}, 'Closing');
       await github.issues.edit({...issue, state: 'closed'});
     }
 
     if (lock) {
-      this.log.info(issue, 'Locking');
+      this.log.info({issue}, 'Locking');
       await github.issues.lock(issue);
     }
   }
@@ -92,7 +91,7 @@ module.exports = class Lockdown {
       const issue = {...repo, number: result.number};
 
       if (comment) {
-        this.log.info(issue, 'Commenting');
+        this.log.info({issue}, 'Commenting');
         await this.ensureUnlock(
           issue,
           {active: result.locked, reason: result.active_lock_reason},
@@ -101,7 +100,7 @@ module.exports = class Lockdown {
       }
 
       if (label) {
-        this.log.info(issue, 'Labeling');
+        this.log.info({issue}, 'Labeling');
         await github.issues.addLabels({
           ...issue,
           labels: [label]
@@ -109,12 +108,12 @@ module.exports = class Lockdown {
       }
 
       if (close && result.state === 'open') {
-        this.log.info(issue, 'Closing');
+        this.log.info({issue}, 'Closing');
         await github.issues.edit({...issue, state: 'closed'});
       }
 
       if (lock && !result.locked) {
-        this.log.info(issue, 'Locking');
+        this.log.info({issue}, 'Locking');
         await github.issues.lock(issue);
       }
     }
@@ -133,7 +132,7 @@ module.exports = class Lockdown {
     }
 
     if (skipCreatedBefore) {
-      query += ` created:>${skipCreatedBefore}`;
+      query += ` created:>${this.getISOTimestamp(skipCreatedBefore)}`;
     }
 
     this.log.info({repo: {owner, repo}}, `Searching ${type}`);
@@ -191,6 +190,10 @@ module.exports = class Lockdown {
     } else {
       await action();
     }
+  }
+
+  getISOTimestamp(date) {
+    return date.toISOString().split('.')[0] + 'Z';
   }
 
   getConfigValue(type, key) {
