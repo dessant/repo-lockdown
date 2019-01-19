@@ -42,6 +42,9 @@ The file can be empty, or it can override any of these default settings:
 # follow ISO 8601 (`YYYY-MM-DD`). Set to `false` to disable
 skipCreatedBefore: false
 
+# Issues and pull requests with these labels will be ignored. Set to `[]` to disable
+exemptLabels: []
+
 # Comment to post before closing or locking. Set to `false` to disable
 comment: false
 

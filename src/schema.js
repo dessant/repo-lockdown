@@ -14,6 +14,17 @@ const fields = {
         'must follow ISO 8601 (`YYYY-MM-DD`). Set to `false` to disable'
     ),
 
+  exemptLabels: Joi.array()
+    .single()
+    .items(
+      Joi.string()
+        .trim()
+        .max(50)
+    )
+    .description(
+      'Issues and pull requests with these labels will be ignored. Set to `[]` to disable'
+    ),
+
   comment: Joi.alternatives()
     .try(
       Joi.string()
@@ -43,6 +54,7 @@ const fields = {
 
 const schema = Joi.object().keys({
   skipCreatedBefore: fields.skipCreatedBefore.default(false),
+  exemptLabels: fields.exemptLabels.default([]),
   comment: fields.comment.default(false),
   label: fields.label.default(false),
   close: fields.close.default(true),

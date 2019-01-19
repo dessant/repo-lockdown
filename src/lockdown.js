@@ -28,6 +28,7 @@ module.exports = class Lockdown {
     }
 
     const skipCreatedBefore = this.getConfigValue(type, 'skipCreatedBefore');
+    const exemptLabels = this.getConfigValue(type, 'exemptLabels');
     const comment = this.getConfigValue(type, 'comment');
     const label = this.getConfigValue(type, 'label');
     const close = this.getConfigValue(type, 'close');
@@ -43,6 +44,17 @@ module.exports = class Lockdown {
       );
       if (created.getTime() < skipCreatedBefore.getTime()) {
         return;
+      }
+    }
+
+    if (exemptLabels.length) {
+      const labels = (payload.issue || payload.pull_request).labels.map(
+        label => label.name
+      );
+      for (const label of exemptLabels) {
+        if (labels.includes(label)) {
+          return;
+        }
       }
     }
 
@@ -122,6 +134,7 @@ module.exports = class Lockdown {
   async search(type) {
     const {owner, repo} = this.context.repo();
     const skipCreatedBefore = this.getConfigValue(type, 'skipCreatedBefore');
+    const exemptLabels = this.getConfigValue(type, 'exemptLabels');
     const lock = this.getConfigValue(type, 'lock');
 
     let query = `repo:${owner}/${repo}`;
@@ -133,6 +146,13 @@ module.exports = class Lockdown {
 
     if (skipCreatedBefore) {
       query += ` created:>${this.getISOTimestamp(skipCreatedBefore)}`;
+    }
+
+    if (exemptLabels.length) {
+      const queryPart = exemptLabels
+        .map(label => `-label:"${label}"`)
+        .join(' ');
+      query += ` ${queryPart}`;
     }
 
     this.log.info({repo: {owner, repo}}, `Searching ${type}`);
