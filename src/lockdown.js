@@ -19,7 +19,9 @@ module.exports = class Lockdown {
 
   async processNewThread() {
     const {github, payload} = this.context;
-    const issue = this.context.issue();
+    const issue = this.context.repo({
+      issue_number: this.context.issue().number
+    });
 
     const {only} = this.config;
     const type = payload.issue ? 'issues' : 'pulls';
@@ -76,7 +78,7 @@ module.exports = class Lockdown {
 
     if (close) {
       this.log.info({issue}, 'Closing');
-      await github.issues.edit({...issue, state: 'closed'});
+      await github.issues.update({...issue, state: 'closed'});
     }
 
     if (lock) {
@@ -100,7 +102,7 @@ module.exports = class Lockdown {
     const results = await this.search(type);
 
     for (const result of results) {
-      const issue = {...repo, number: result.number};
+      const issue = {...repo, issue_number: result.number};
 
       if (comment) {
         this.log.info({issue}, 'Commenting');
@@ -121,7 +123,7 @@ module.exports = class Lockdown {
 
       if (close && result.state === 'open') {
         this.log.info({issue}, 'Closing');
-        await github.issues.edit({...issue, state: 'closed'});
+        await github.issues.update({...issue, state: 'closed'});
       }
 
       if (lock && !result.locked) {
@@ -156,7 +158,7 @@ module.exports = class Lockdown {
     }
 
     this.log.info({repo: {owner, repo}}, `Searching ${type}`);
-    let results = (await this.context.github.search.issues({
+    let results = (await this.context.github.search.issuesAndPullRequests({
       q: query + ' is:open',
       sort: 'updated',
       order: 'desc',
@@ -167,15 +169,17 @@ module.exports = class Lockdown {
     })).data.items;
 
     if (lock) {
-      const unlockedIssues = (await this.context.github.search.issues({
-        q: query + ' is:unlocked',
-        sort: 'updated',
-        order: 'desc',
-        per_page: 30,
-        headers: {
-          Accept: 'application/vnd.github.sailor-v-preview+json'
+      const unlockedIssues = (await this.context.github.search.issuesAndPullRequests(
+        {
+          q: query + ' is:unlocked',
+          sort: 'updated',
+          order: 'desc',
+          per_page: 30,
+          headers: {
+            Accept: 'application/vnd.github.sailor-v-preview+json'
+          }
         }
-      })).data.items;
+      )).data.items;
 
       // `is:unlocked` search qualifier is undocumented, skip locked issues
       results.push(...unlockedIssues.filter(issue => !issue.locked));
