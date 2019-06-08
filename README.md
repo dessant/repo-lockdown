@@ -14,8 +14,10 @@ such as forks or mirrors.
 
 The continued development of Repo Lockdown is made possible
 thanks to the support of awesome backers. If you'd like to join them,
-please consider contributing with [Patreon](https://www.patreon.com/dessant),
-[PayPal](https://www.paypal.me/ArminSebastian) or [Bitcoin](https://goo.gl/uJUAaU).
+please consider contributing with
+[Patreon](https://armin.dev/go/patreon?pr=repo-lockdown&src=repo),
+[PayPal](https://armin.dev/go/paypal?pr=repo-lockdown&src=repo) or
+[Bitcoin](https://armin.dev/go/bitcoin?pr=repo-lockdown&src=repo).
 
 ## Usage
 
@@ -25,7 +27,7 @@ please consider contributing with [Patreon](https://www.patreon.com/dessant),
 3. New issues and/or pull requests will be handled as they are opened,
    while existing ones will begin to be processed within an hour
 
-⚠️ **If possible, install the app only for select repositories.
+**If possible, install the app only for select repositories.
 Do not leave the `All repositories` option selected, unless you intend
 to use the app for all current and future repositories.**
 
