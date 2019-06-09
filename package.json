@@ -1,6 +1,6 @@
 {
   "name": "repo-lockdown",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "A GitHub App built with Probot that closes and locks new and existing issues or pull requests.",
   "author": "Armin Sebastian",
   "license": "MIT",

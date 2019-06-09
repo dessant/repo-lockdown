@@ -1,6 +1,20 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [1.0.0](https://github.com/dessant/repo-lockdown/compare/v0.2.1...v1.0.0) (2019-06-09)
+
+
+### Features
+
+* update dependencies ([04338d5](https://github.com/dessant/repo-lockdown/commit/04338d5))
+
+
+### BREAKING CHANGES
+
+* probot < 9.2.13 no longer supported.
+
+
 
 <a name="0.2.1"></a>
 ## [0.2.1](https://github.com/dessant/repo-lockdown/compare/v0.2.0...v0.2.1) (2019-01-20)
