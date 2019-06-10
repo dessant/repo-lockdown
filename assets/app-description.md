@@ -4,7 +4,7 @@ A GitHub App that closes and locks new and existing issues or pull requests. It 
 
 ## Supporting the Project
 
-The continued development of Repo Lockdown is made possible thanks to the support of awesome backers. If you'd like to join them, please consider contributing with [Patreon](https://armin.dev/go/patreon?pr=repo-lockdown&src=repo), [PayPal](https://armin.dev/go/paypal?pr=repo-lockdown&src=repo) or [Bitcoin](https://armin.dev/go/bitcoin?pr=repo-lockdown&src=repo).
+The continued development of Repo Lockdown is made possible thanks to the support of awesome backers. If you'd like to join them, please consider contributing with [Patreon](https://armin.dev/go/patreon?pr=repo-lockdown&src=app), [PayPal](https://armin.dev/go/paypal?pr=repo-lockdown&src=app) or [Bitcoin](https://armin.dev/go/bitcoin?pr=repo-lockdown&src=app).
 
 ## Usage
 
