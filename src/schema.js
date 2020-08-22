@@ -1,75 +1,166 @@
-const Joi = require('@hapi/joi');
+const Joi = require('joi');
 
-const fields = {
-  skipCreatedBefore: Joi.alternatives()
+const extendedJoi = Joi.extend({
+  type: 'stringList',
+  base: Joi.array(),
+  coerce: {
+    from: 'string',
+    method(value) {
+      value = value.trim();
+      if (value) {
+        value = value
+          .split(',')
+          .map(item => item.trim())
+          .filter(Boolean);
+      }
+
+      return {value};
+    }
+  }
+}).extend({
+  type: 'processOnly',
+  base: Joi.string(),
+  coerce: {
+    from: 'string',
+    method(value) {
+      value = value.trim();
+      if (['issues', 'prs'].includes(value)) {
+        value = value.slice(0, -1);
+      }
+
+      return {value};
+    }
+  }
+});
+
+const schema = Joi.object({
+  'github-token': Joi.string().trim().max(100),
+
+  'exclude-issue-created-before': Joi.alternatives()
     .try(
       Joi.date()
-        .iso()
+        // .iso()
         .min('1970-01-01T00:00:00Z')
         .max('2970-12-31T23:59:59Z'),
-      Joi.boolean().only(false)
+      Joi.string().trim().valid('')
     )
-    .description(
-      'Skip issues and pull requests created before a given timestamp. Timestamp ' +
-        'must follow ISO 8601 (`YYYY-MM-DD`). Set to `false` to disable'
-    ),
+    .default(''),
 
-  exemptLabels: Joi.array()
-    .single()
-    .items(
-      Joi.string()
-        .trim()
-        .max(50)
-    )
-    .description(
-      'Issues and pull requests with these labels will be ignored. Set to `[]` to disable'
-    ),
-
-  comment: Joi.alternatives()
+  'exclude-issue-labels': Joi.alternatives()
     .try(
-      Joi.string()
-        .trim()
-        .max(10000),
-      Joi.boolean().only(false)
+      extendedJoi
+        .stringList()
+        .items(Joi.string().trim().max(50))
+        .min(1)
+        .max(30)
+        .unique(),
+      Joi.string().trim().valid('')
     )
-    .description(
-      'Comment to post before closing or locking. Set to `false` to disable'
-    ),
+    .default(''),
 
-  label: Joi.alternatives()
+  'issue-labels': Joi.alternatives()
     .try(
-      Joi.string()
-        .trim()
-        .max(50),
-      Joi.boolean().only(false)
+      extendedJoi
+        .stringList()
+        .items(Joi.string().trim().max(50))
+        .min(1)
+        .max(30)
+        .unique(),
+      Joi.string().trim().valid('')
     )
-    .description(
-      'Label to add before closing or locking. Set to `false` to disable'
+    .default(''),
+
+  'issue-comment': Joi.string().trim().max(10000).allow('').default(''),
+
+  'skip-closed-issue-comment': Joi.boolean().default(false),
+
+  'close-issue': Joi.boolean()
+    .default(true)
+    .error(
+      new Error(
+        '"close-issue" must be a boolean, either "close-issue" or "lock-issue" must be "true"'
+      )
     ),
 
-  close: Joi.boolean().description('Close issues and pull requests'),
+  'lock-issue': Joi.boolean()
+    .when('close-issue', {
+      is: Joi.boolean().valid(false),
+      then: Joi.boolean().valid(true)
+    })
+    .default(true)
+    .error(
+      new Error(
+        '"lock-issue" must be a boolean, either "close-issue" or "lock-issue" must be "true"'
+      )
+    ),
 
-  lock: Joi.boolean().description('Lock issues and pull requests')
-};
+  'issue-lock-reason': Joi.string()
+    .valid('resolved', 'off-topic', 'too heated', 'spam', '')
+    .default('resolved'),
 
-const schema = Joi.object().keys({
-  skipCreatedBefore: fields.skipCreatedBefore.default(false),
-  exemptLabels: fields.exemptLabels.default([]),
-  comment: fields.comment.default(false),
-  label: fields.label.default(false),
-  close: fields.close.default(true),
-  lock: fields.lock.default(true),
-  only: Joi.string()
-    .trim()
-    .valid('issues', 'pulls')
-    .description('Limit to only `issues` or `pulls`'),
-  pulls: Joi.object().keys(fields),
-  issues: Joi.object().keys(fields),
-  _extends: Joi.string()
-    .trim()
-    .max(260)
-    .description('Repository to extend settings from'),
-  perform: Joi.boolean().default(!process.env.DRY_RUN)
+  'exclude-pr-created-before': Joi.alternatives()
+    .try(
+      Joi.date()
+        // .iso()
+        .min('1970-01-01T00:00:00Z')
+        .max('2970-12-31T23:59:59Z'),
+      Joi.string().trim().valid('')
+    )
+    .default(''),
+
+  'exclude-pr-labels': Joi.alternatives()
+    .try(
+      extendedJoi
+        .stringList()
+        .items(Joi.string().trim().max(50))
+        .min(1)
+        .max(30)
+        .unique(),
+      Joi.string().trim().valid('')
+    )
+    .default(''),
+
+  'pr-labels': Joi.alternatives()
+    .try(
+      extendedJoi
+        .stringList()
+        .items(Joi.string().trim().max(50))
+        .min(1)
+        .max(30)
+        .unique(),
+      Joi.string().trim().valid('')
+    )
+    .default(''),
+
+  'pr-comment': Joi.string().trim().max(10000).allow('').default(''),
+
+  'skip-closed-pr-comment': Joi.boolean().default(false),
+
+  'close-pr': Joi.boolean()
+    .default(true)
+    .error(
+      new Error(
+        '"close-pr" must be a boolean, either "close-pr" or "lock-pr" must be "true"'
+      )
+    ),
+
+  'lock-pr': Joi.boolean()
+    .when('close-pr', {
+      is: Joi.boolean().valid(false),
+      then: Joi.boolean().valid(true)
+    })
+    .default(true)
+    .error(
+      new Error(
+        '"lock-pr" must be a boolean, either "pr-close" or "lock-pr" must be "true"'
+      )
+    ),
+
+  'pr-lock-reason': Joi.string()
+    .valid('resolved', 'off-topic', 'too heated', 'spam', '')
+    .default('resolved'),
+
+  'process-only': extendedJoi.processOnly().valid('issue', 'pr', '').default('')
 });
 
 module.exports = schema;

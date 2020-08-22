@@ -1,12 +1,11 @@
 # Repo Lockdown
 
-[![Build Status](https://img.shields.io/travis/com/dessant/repo-lockdown/master.svg)](https://travis-ci.com/dessant/repo-lockdown)
-[![Version](https://img.shields.io/npm/v/repo-lockdown.svg?colorB=007EC6)](https://www.npmjs.com/package/repo-lockdown)
+Repo Lockdown is a GitHub Action that immediately closes and locks
+issues and pull requests. It is mainly used with repositories
+that do not accept issues or pull requests, such as forks and mirrors.
 
-Repo Lockdown is a GitHub App built with [Probot](https://github.com/probot/probot)
-that closes and locks new and existing issues or pull requests.
-It is used for repositories which do not accept issues or pull requests,
-such as forks or mirrors.
+> The legacy version of this project can be found
+[here](https://github.com/dessant/repo-lockdown-app).
 
 ![](assets/screenshot.png)
 
@@ -21,74 +20,252 @@ please consider contributing with
 
 ## Usage
 
-1. **[Install the GitHub App](https://github.com/apps/repo-lockdown)**
-   for the intended repositories
-2. Create `.github/lockdown.yml` based on the template below
-3. New issues and/or pull requests will be handled as they are opened,
-   while existing ones will begin to be processed within an hour
+Create a `lockdown.yml` workflow file in the `.github/workflows` directory,
+use one of the [example workflows](#examples) to get started.
 
-**If possible, install the app only for select repositories.
-Do not leave the `All repositories` option selected, unless you intend
-to use the app for all current and future repositories.**
+### Inputs
+The action can be configured using [input parameters](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith).
+All parameters are optional, except `github-token`.
 
-#### Configuration
+- **`github-token`**
+  - GitHub access token, value must be `${{ github.token }}`
+  - Required
+- **`exclude-issue-created-before`**
+  - Do not process issues created before a given timestamp,
+    value must follow ISO 8601
+  - Optional, defaults to `''`
+- **`exclude-issue-labels`**
+  - Do not process issues with these labels, value must be
+    a comma separated list of labels
+  - Optional, defaults to `''`
+- **`issue-labels`**
+  - Labels to add before closing or locking an issue, value must be
+    a comma separated list of labels
+  - Optional, defaults to `''`
+- **`issue-comment`**
+  - Comment to post before closing or locking an issue
+  - Optional, defaults to `''`
+- **`skip-closed-issue-comment`**
+  - Do not comment on already closed issues before locking,
+    value must be either `true` or `false`
+  - Optional, defaults to `false`
+- **`close-issue`**
+  - Close issues, value must be either `true` or `false`
+  - Optional, defaults to `true`
+- **`lock-issue`**
+  - Lock issues, value must be either `true` or `false`
+  - Optional, defaults to `true`
+- **`issue-lock-reason`**
+  - Reason for locking an issue, value must be one
+    of `resolved`, `off-topic`, `too heated` or `spam`
+  - Optional, defaults to `''`
+- **`exclude-pr-created-before`**
+  - Do not process pull requests created before a given timestamp,
+    value must follow ISO 8601
+  - Optional, defaults to `''`
+- **`exclude-pr-labels`**
+  - Do not process pull requests with these labels, value must be
+    a comma separated list of labels
+  - Optional, defaults to `''`
+- **`pr-labels`**
+  - Labels to add before closing or locking a pull request, value must be
+    a comma separated list of labels
+  - Optional, defaults to `''`
+- **`pr-comment`**
+  - Comment to post before closing or locking a pull request
+  - Optional, defaults to `''`
+- **`skip-closed-pr-comment`**
+  - Do not comment on already closed pull requests before locking,
+    value must be either `true` or `false`
+  - Optional, defaults to `false`
+- **`close-pr`**
+  - Close pull requests, value must be either `true` or `false`
+  - Optional, defaults to `true`
+- **`lock-pr`**
+  - Lock pull requests, value must be either `true` or `false`
+  - Optional, defaults to `true`
+- **`pr-lock-reason`**
+  - Reason for locking a pull request, value must be one
+    of `resolved`, `off-topic`, `too heated` or `spam`
+  - Optional, defaults to `''`
+- **`process-only`**
+  - Process only issues or pull requests, value must be
+    either `issues` or `prs`
+  - Optional, defaults to `''`
 
-Create `.github/lockdown.yml` in the default branch to enable the app,
-or add it at the same file path to a repository named `.github`.
-The file can be empty, or it can override any of these default settings:
+### Outputs
+
+- **`issues`**
+  - Issues that have been closed or locked, value is a JSON string
+    in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
+- **`prs`**
+  - Pull requests that have been closed or locked, value is a JSON string
+    in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
+
+## Examples
+
+The following workflow will search once an hour for existing issues
+and pull requests that can be closed or locked. New issues and pull requests
+will be immediately processed when they are opened.
 
 ```yaml
-# Configuration for Repo Lockdown - https://github.com/dessant/repo-lockdown
+name: 'Lock down repository'
 
-# Skip issues and pull requests created before a given timestamp. Timestamp must
-# follow ISO 8601 (`YYYY-MM-DD`). Set to `false` to disable
-skipCreatedBefore: false
+on:
+  issues:
+    types: opened
+  pull_request:
+    types: opened
+  schedule:
+    - cron: '0 * * * *'
 
-# Issues and pull requests with these labels will be ignored. Set to `[]` to disable
-exemptLabels: []
+jobs:
+  lockdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ github.token }}
+```
 
-# Comment to post before closing or locking. Set to `false` to disable
-comment: false
+Scheduled runs are no longer needed once the initial backlog
+of issues and pull requests has been processed. It's best to edit
+the workflow after the backlog has been processed and remove
+the `schedule` event to avoid unnecessary workflow runs.
 
-# Label to add before closing or locking. Set to `false` to disable
-label: false
+```yaml
+on:
+  issues:
+    types: opened
+  pull_request:
+    types: opened
+```
 
-# Close issues and pull requests
-close: true
+### Available input parameters
 
-# Lock issues and pull requests
-lock: true
+This workflow declares all the available input parameters of the action
+and their default values. Any of the parameters can be omitted,
+except `github-token`.
 
-# Limit to only `issues` or `pulls`
-# only: issues
+```yaml
+name: 'Lock down repository'
 
-# Optionally, specify configuration settings just for `issues` or `pulls`
-# issues:
-#   label: wontfix
+on:
+  issues:
+    types: opened
+  pull_request:
+    types: opened
+  schedule:
+    - cron: '0 * * * *'
 
-# pulls:
-#   comment: >
-#     This repository does not accept pull requests, see the README for details.
-#   lock: false
+jobs:
+  lockdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ github.token }}
+          exclude-issue-created-before: ''
+          exclude-issue-labels: ''
+          issue-labels: ''
+          issue-comment: ''
+          skip-closed-issue-comment: false
+          close-issue: true
+          lock-issue: true
+          issue-lock-reason: ''
+          exclude-pr-created-before: ''
+          exclude-pr-labels: ''
+          pr-labels: ''
+          pr-comment: ''
+          skip-closed-pr-comment: false
+          close-pr: true
+          lock-pr: true
+          pr-lock-reason: ''
+          process-only: ''
+```
 
-# Repository to extend settings from
-# _extends: repo
+### Excluding issues and pull requests
+
+This step will close and lock only issues, and exclude issues created
+before 2018, or those with the `pinned` or `help-wanted` labels applied.
+
+```yaml
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ github.token }}
+          exclude-issue-created-before: '2018-01-01T00:00:00Z'
+          exclude-issue-labels: 'pinned, help-wanted'
+          process-only: 'issues'
+```
+
+This step will close only pull requests, and exclude those
+with the `pinned` label applied.
+
+```yaml
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ github.token }}
+          exclude-pr-labels: 'pinned'
+          lock-pr: false
+          process-only: 'prs'
+```
+
+### Commenting and labeling
+
+This step will post a comment on issues and pull requests before
+closing and locking them, and will apply the `off-topic` label to issues.
+
+```yaml
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ github.token }}
+          issue-labels: 'off-topic'
+          issue-comment: >
+            This repository does not accept bug reports,
+            see the README for details.
+          pr-comment: >
+            This repository does not accept pull requests,
+            see the README for details.
+```
+
+### Reducing notification spam while commenting
+
+Informing the participants of issues and pull requests before locking
+discussions can help redirect contributors to the right place
+to continue their work, though it may be useful to avoid posting comments
+on already closed issues and pull requests to reduce notification spam.
+
+This step will post a comment on open issues and pull requests before
+closing and locking them, and will avoid commenting on threads
+that have already been closed before locking them.
+
+```yaml
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ github.token }}
+          issue-comment: >
+            This repository does not accept bug reports,
+            see the README for details.
+          skip-closed-issue-comment: true
+          pr-comment: >
+            This repository does not accept pull requests,
+            see the README for details.
+          skip-closed-pr-comment: true
 ```
 
 ## Why are only some issues and pull requests processed?
 
-To avoid triggering abuse prevention mechanisms on GitHub, only 30 issues
-and pull requests will be handled per hour. If your repository has more
+To avoid triggering abuse prevention mechanisms on GitHub, only 50 issues
+and pull requests will be handled at once. If your repository has more
 than that, it will just take a few hours or days to process them all.
-
-## Deployment
-
-See [docs/deploy.md](docs/deploy.md) if you would like to run your own
-instance of this app.
 
 ## License
 
-Copyright (c) 2019 Armin Sebastian
+Copyright (c) 2019-2020 Armin Sebastian
 
 This software is released under the terms of the MIT License.
 See the [LICENSE](LICENSE) file for further information.

@@ -1,0 +1,69 @@
+name: 'Repo Lockdown'
+description: 'Immediately close and lock issues and pull requests'
+author: 'Armin Sebastian'
+inputs:
+  github-token:
+    description: 'GitHub access token'
+    required: true
+  exclude-issue-created-before:
+    description: 'Do not process issues created before a given timestamp, value must follow ISO 8601'
+    default: ''
+  exclude-issue-labels:
+    description: 'Do not process issues with these labels, value must be a comma separated list of labels'
+    default: ''
+  issue-labels:
+    description: 'Labels to add before closing or locking an issue, value must be a comma separated list of labels'
+    default: ''
+  issue-comment:
+    description: 'Comment to post before closing or locking an issue'
+    default: ''
+  skip-closed-issue-comment:
+    description: 'Do not comment on already closed issues before locking, value must be either `true` or `false`'
+    default: false
+  close-issue:
+    description: 'Close issues, value must be either `true` or `false`'
+    default: true
+  lock-issue:
+    description: 'Lock issues, value must be either `true` or `false`'
+    default: true
+  issue-lock-reason:
+    description: 'Reason for locking an issue, value must be one of `resolved`, `off-topic`, `too heated` or `spam`'
+    default: ''
+  exclude-pr-created-before:
+    description: 'Do not process pull requests created before a given timestamp, value must follow ISO 8601'
+    default: ''
+  exclude-pr-labels:
+    description: 'Do not process pull requests with these labels, value must be a comma separated list of labels'
+    default: ''
+  pr-labels:
+    description: 'Labels to add before closing or locking a pull request, value must be a comma separated list of labels'
+    default: ''
+  pr-comment:
+    description: 'Comment to post before closing or locking a pull request'
+    default: ''
+  skip-closed-pr-comment:
+    description: 'Do not comment on already closed pull requests before locking, value must be either `true` or `false`'
+    default: false
+  close-pr:
+    description: 'Close pull requests, value must be either `true` or `false`'
+    default: true
+  lock-pr:
+    description: 'Lock pull requests, value must be either `true` or `false`'
+    default: true
+  pr-lock-reason:
+    description: 'Reason for locking a pull request, value must be one of `resolved`, `off-topic`, `too heated` or `spam`'
+    default: ''
+  process-only:
+    description: 'Process only issues or pull requests, value must be either `issues` or `prs`'
+    default: ''
+outputs:
+  issues:
+    description: 'Issues that have been closed or locked, value is a JSON string'
+  prs:
+    description: 'Pull requests that have been closed or locked, value is a JSON string'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: 'shield'
+  color: 'red'
