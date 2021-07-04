@@ -17,4 +17,3 @@ jobs:
           release_name: ${{ github.ref }}
           body: >
             Learn more about this release from the [changelog](https://github.com/dessant/repo-lockdown/blob/master/CHANGELOG.md#changelog).
-          draft: true
