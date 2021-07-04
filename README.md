@@ -4,9 +4,6 @@ Repo Lockdown is a GitHub Action that immediately closes and locks
 issues and pull requests. It is mainly used with repositories
 that do not accept issues or pull requests, such as forks and mirrors.
 
-> The legacy version of this project can be found
-[here](https://github.com/dessant/repo-lockdown-app).
-
 ![](assets/screenshot.png)
 
 ## Supporting the Project
@@ -25,13 +22,13 @@ use one of the [example workflows](#examples) to get started.
 
 ### Inputs
 
-The action can be configured using [input parameters](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith).
-All parameters are optional, except `github-token`.
+The action can be configured using [input parameters](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith).
 
 <!-- prettier-ignore -->
 - **`github-token`**
-  - GitHub access token, value must be `${{ github.token }}`
-  - Required
+  - GitHub access token, value must be `${{ github.token }}` or an encrypted
+    secret that contains a [personal access token](#using-a-personal-access-token)
+  - Optional, defaults to `${{ github.token }}`
 - **`exclude-issue-created-before`**
   - Do not process issues created before a given timestamp,
     value must follow ISO 8601
@@ -113,7 +110,7 @@ will be immediately processed when they are opened.
 
 <!-- prettier-ignore -->
 ```yaml
-name: 'Lock down repository'
+name: 'Repo Lockdown'
 
 on:
   issues:
@@ -132,8 +129,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: dessant/repo-lockdown@v2
-        with:
-          github-token: ${{ github.token }}
 ```
 
 Scheduled runs are no longer needed once the initial backlog
@@ -153,12 +148,11 @@ on:
 ### Available input parameters
 
 This workflow declares all the available input parameters of the action
-and their default values. Any of the parameters can be omitted,
-except `github-token`.
+and their default values. Any of the parameters can be omitted.
 
 <!-- prettier-ignore -->
 ```yaml
-name: 'Lock down repository'
+name: 'Repo Lockdown'
 
 on:
   issues:
@@ -208,7 +202,6 @@ before 2018, or those with the `pinned` or `help-wanted` labels applied.
     steps:
       - uses: dessant/repo-lockdown@v2
         with:
-          github-token: ${{ github.token }}
           exclude-issue-created-before: '2018-01-01T00:00:00Z'
           exclude-issue-labels: 'pinned, help-wanted'
           process-only: 'issues'
@@ -222,7 +215,6 @@ with the `pinned` label applied.
     steps:
       - uses: dessant/repo-lockdown@v2
         with:
-          github-token: ${{ github.token }}
           exclude-pr-labels: 'pinned'
           lock-pr: false
           process-only: 'prs'
@@ -238,7 +230,6 @@ closing and locking them, and will apply the `off-topic` label to issues.
     steps:
       - uses: dessant/repo-lockdown@v2
         with:
-          github-token: ${{ github.token }}
           issue-labels: 'off-topic'
           issue-comment: >
             This repository does not accept bug reports,
@@ -264,7 +255,6 @@ that have already been closed before locking them.
     steps:
       - uses: dessant/repo-lockdown@v2
         with:
-          github-token: ${{ github.token }}
           issue-comment: >
             This repository does not accept bug reports,
             see the README for details.
@@ -273,6 +263,26 @@ that have already been closed before locking them.
             This repository does not accept pull requests,
             see the README for details.
           skip-closed-pr-comment: true
+```
+
+### Using a personal access token
+
+The action uses an installation access token by default to interact with GitHub.
+You may also authenticate with a personal access token to perform actions
+as a GitHub user instead of the `github-actions` app.
+
+Create a [personal access token](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+with the `repo` or `public_repo` scopes enabled, and add the token as an
+[encrypted secret](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
+for the repository or organization, then provide the action with the secret
+using the `github-token` input parameter.
+
+<!-- prettier-ignore -->
+```yaml
+    steps:
+      - uses: dessant/repo-lockdown@v2
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 ```
 
 ## Why are only some issues and pull requests processed?
