@@ -24,9 +24,11 @@ Create a `lockdown.yml` workflow file in the `.github/workflows` directory,
 use one of the [example workflows](#examples) to get started.
 
 ### Inputs
+
 The action can be configured using [input parameters](https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith).
 All parameters are optional, except `github-token`.
 
+<!-- prettier-ignore -->
 - **`github-token`**
   - GitHub access token, value must be `${{ github.token }}`
   - Required
@@ -95,6 +97,7 @@ All parameters are optional, except `github-token`.
 
 ### Outputs
 
+<!-- prettier-ignore -->
 - **`issues`**
   - Issues that have been closed or locked, value is a JSON string
     in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
@@ -108,6 +111,7 @@ The following workflow will search once an hour for existing issues
 and pull requests that can be closed or locked. New issues and pull requests
 will be immediately processed when they are opened.
 
+<!-- prettier-ignore -->
 ```yaml
 name: 'Lock down repository'
 
@@ -119,8 +123,12 @@ on:
   schedule:
     - cron: '0 * * * *'
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
-  lockdown:
+  action:
     runs-on: ubuntu-latest
     steps:
       - uses: dessant/repo-lockdown@v2
@@ -133,6 +141,7 @@ of issues and pull requests has been processed. It's best to edit
 the workflow after the backlog has been processed and remove
 the `schedule` event to avoid unnecessary workflow runs.
 
+<!-- prettier-ignore -->
 ```yaml
 on:
   issues:
@@ -147,6 +156,7 @@ This workflow declares all the available input parameters of the action
 and their default values. Any of the parameters can be omitted,
 except `github-token`.
 
+<!-- prettier-ignore -->
 ```yaml
 name: 'Lock down repository'
 
@@ -158,8 +168,12 @@ on:
   schedule:
     - cron: '0 * * * *'
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
-  lockdown:
+  action:
     runs-on: ubuntu-latest
     steps:
       - uses: dessant/repo-lockdown@v2
@@ -189,6 +203,7 @@ jobs:
 This step will close and lock only issues, and exclude issues created
 before 2018, or those with the `pinned` or `help-wanted` labels applied.
 
+<!-- prettier-ignore -->
 ```yaml
     steps:
       - uses: dessant/repo-lockdown@v2
@@ -202,6 +217,7 @@ before 2018, or those with the `pinned` or `help-wanted` labels applied.
 This step will close only pull requests, and exclude those
 with the `pinned` label applied.
 
+<!-- prettier-ignore -->
 ```yaml
     steps:
       - uses: dessant/repo-lockdown@v2
@@ -217,6 +233,7 @@ with the `pinned` label applied.
 This step will post a comment on issues and pull requests before
 closing and locking them, and will apply the `off-topic` label to issues.
 
+<!-- prettier-ignore -->
 ```yaml
     steps:
       - uses: dessant/repo-lockdown@v2
@@ -242,6 +259,7 @@ This step will post a comment on open issues and pull requests before
 closing and locking them, and will avoid commenting on threads
 that have already been closed before locking them.
 
+<!-- prettier-ignore -->
 ```yaml
     steps:
       - uses: dessant/repo-lockdown@v2
