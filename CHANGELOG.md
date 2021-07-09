@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/dessant/repo-lockdown/compare/v2.0.1...v2.1.0) (2021-07-09)
+
+
+### Features
+
+* make github-token optional and document the use of personal access tokens ([8ac1721](https://github.com/dessant/repo-lockdown/commit/8ac17218715c0cd6c0d25cb1b3291ffb50c948f3))
+
+
+### Bug Fixes
+
+* declare required permissions ([4fd3558](https://github.com/dessant/repo-lockdown/commit/4fd355865201d150017730e243bd1dcaedcb3f27))
+
 ### [2.0.1](https://github.com/dessant/repo-lockdown/compare/v2.0.0...v2.0.1) (2021-01-01)
 
 
