@@ -26991,9 +26991,8 @@ class App {
     const processedThreads = [];
 
     if (threadData) {
-      const excludeCreatedBefore = this.config[
-        `exclude-${threadType}-created-before`
-      ];
+      const excludeCreatedBefore =
+        this.config[`exclude-${threadType}-created-before`];
       if (excludeCreatedBefore) {
         const created = new Date(threadData.created_at);
         if (created.getTime() < excludeCreatedBefore.getTime()) {
@@ -27025,13 +27024,13 @@ class App {
         await this.ensureUnlock(
           issue,
           {active: thread.locked, reason: thread.active_lock_reason},
-          () => this.client.issues.createComment({...issue, body: comment})
+          () => this.client.rest.issues.createComment({...issue, body: comment})
         );
       }
 
       if (labels) {
         core.debug(`Labeling (${threadType}: ${thread.number})`);
-        await this.client.issues.addLabels({
+        await this.client.rest.issues.addLabels({
           ...issue,
           labels
         });
@@ -27039,7 +27038,7 @@ class App {
 
       if (close && thread.state === 'open') {
         core.debug(`Closing (${threadType}: ${thread.number})`);
-        await this.client.issues.update({...issue, state: 'closed'});
+        await this.client.rest.issues.update({...issue, state: 'closed'});
       }
 
       if (lock && !thread.locked) {
@@ -27056,7 +27055,7 @@ class App {
         } else {
           params = issue;
         }
-        await this.client.issues.lock(params);
+        await this.client.rest.issues.lock(params);
       }
 
       processedThreads.push({...repo, number: thread.number});
@@ -27069,9 +27068,8 @@ class App {
     const {owner, repo} = github.context.repo;
     let query = `repo:${owner}/${repo} is:${threadType}`;
 
-    const excludeCreatedBefore = this.config[
-      `exclude-${threadType}-created-before`
-    ];
+    const excludeCreatedBefore =
+      this.config[`exclude-${threadType}-created-before`];
     if (excludeCreatedBefore) {
       query += ` created:>${this.getISOTimestamp(excludeCreatedBefore)}`;
     }
@@ -27091,7 +27089,7 @@ class App {
     const close = this.config[`close-${threadType}`];
     if (close) {
       const openIssues = (
-        await this.client.search.issuesAndPullRequests({
+        await this.client.rest.search.issuesAndPullRequests({
           q: query + ' is:open',
           sort: 'updated',
           order: 'desc',
@@ -27109,7 +27107,7 @@ class App {
     const lock = this.config[`lock-${threadType}`];
     if (lock) {
       const unlockedIssues = (
-        await this.client.search.issuesAndPullRequests({
+        await this.client.rest.search.issuesAndPullRequests({
           q: query + ' is:unlocked',
           sort: 'updated',
           order: 'desc',
@@ -27127,7 +27125,7 @@ class App {
   async ensureUnlock(issue, lock, action) {
     if (lock.active) {
       if (!lock.hasOwnProperty('reason')) {
-        const {data: issueData} = await this.client.issues.get({
+        const {data: issueData} = await this.client.rest.issues.get({
           ...issue,
           headers: {
             Accept: 'application/vnd.github.sailor-v-preview+json'
@@ -27135,7 +27133,7 @@ class App {
         });
         lock.reason = issueData.active_lock_reason;
       }
-      await this.client.issues.unlock(issue);
+      await this.client.rest.issues.unlock(issue);
       await action();
       if (lock.reason) {
         issue = {
@@ -27146,7 +27144,7 @@ class App {
           }
         };
       }
-      await this.client.issues.lock(issue);
+      await this.client.rest.issues.lock(issue);
     } else {
       await action();
     }
