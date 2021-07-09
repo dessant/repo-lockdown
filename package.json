@@ -1,6 +1,6 @@
 {
   "name": "repo-lockdown",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A GitHub Action that immediately closes and locks issues and pull requests.",
   "author": "Armin Sebastian",
   "license": "MIT",
