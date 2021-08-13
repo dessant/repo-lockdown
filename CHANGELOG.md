@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/dessant/repo-lockdown/compare/v2.1.1...v2.1.2) (2021-08-13)
+
+
+### Bug Fixes
+
+* use correct pull request event in workflow examples ([20caf22](https://github.com/dessant/repo-lockdown/commit/20caf225ed11d020cfa0ed41e1bff90b1a629930))
+
 ### [2.1.1](https://github.com/dessant/repo-lockdown/compare/v2.1.0...v2.1.1) (2021-07-09)
 
 
