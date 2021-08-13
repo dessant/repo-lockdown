@@ -115,7 +115,7 @@ name: 'Repo Lockdown'
 on:
   issues:
     types: opened
-  pull_request:
+  pull_request_target:
     types: opened
   schedule:
     - cron: '0 * * * *'
@@ -141,7 +141,7 @@ the `schedule` event to avoid unnecessary workflow runs.
 on:
   issues:
     types: opened
-  pull_request:
+  pull_request_target:
     types: opened
 ```
 
@@ -157,7 +157,7 @@ name: 'Repo Lockdown'
 on:
   issues:
     types: opened
-  pull_request:
+  pull_request_target:
     types: opened
   schedule:
     - cron: '0 * * * *'
