@@ -130,7 +130,18 @@ class App {
         await this.ensureUnlock(
           issue,
           {active: thread.locked, reason: thread.active_lock_reason},
-          () => this.client.rest.issues.createComment({...issue, body: comment})
+          async () => {
+            try {
+              await this.client.rest.issues.createComment({
+                ...issue,
+                body: comment
+              });
+            } catch (err) {
+              if (!/cannot be modified.*discussion/i.test(err.message)) {
+                throw err;
+              }
+            }
+          }
         );
       }
 
