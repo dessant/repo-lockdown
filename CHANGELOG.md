@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/dessant/repo-lockdown/compare/v2.1.2...v2.2.0) (2021-10-02)
+
+
+### Features
+
+* add option for logging output parameters ([bd108ef](https://github.com/dessant/repo-lockdown/commit/bd108ef505a24a7ef6715ef0dade6e0a8512596d))
+
+
+### Bug Fixes
+
+* ignore error when commenting on issue converted to discussion ([312cff0](https://github.com/dessant/repo-lockdown/commit/312cff0219a50aeae50633d05e40fed93e6d8760))
+
 ### [2.1.2](https://github.com/dessant/repo-lockdown/compare/v2.1.1...v2.1.2) (2021-08-13)
 
 
