@@ -28,16 +28,24 @@ class App {
 
   async processBacklog() {
     const processOnly = this.config['process-only'];
+    const logOutput = this.config['log-output'];
     const threadTypes = processOnly ? [processOnly] : ['issue', 'pr'];
 
     let threadsFound = false;
     for (const threadType of threadTypes) {
       const threads = await this.lockdown({threadType});
 
+      core.debug(`Setting output (${threadType}s)`);
       if (threads.length) {
         threadsFound = true;
-        core.debug(`Setting output (${threadType}s)`);
         core.setOutput(`${threadType}s`, JSON.stringify(threads));
+
+        if (logOutput) {
+          core.info(`Output (${threadType}s)`);
+          core.info(JSON.stringify(threads, null, 2));
+        }
+      } else {
+        core.setOutput(`${threadType}s`, '');
       }
     }
 
@@ -49,6 +57,7 @@ class App {
   }
 
   async processNewThread() {
+    const logOutput = this.config['log-output'];
     const threadType = github.context.eventName === 'issues' ? 'issue' : 'pr';
 
     const processOnly = this.config['process-only'];
@@ -62,9 +71,16 @@ class App {
         github.context.payload.issue || github.context.payload.pull_request
     });
 
+    core.debug(`Setting output (${threadType}s)`);
     if (threads.length) {
-      core.debug(`Setting output (${threadType}s)`);
       core.setOutput(`${threadType}s`, JSON.stringify(threads));
+
+      if (logOutput) {
+        core.info(`Output (${threadType}s)`);
+        core.info(JSON.stringify(threads, null, 2));
+      }
+    } else {
+      core.setOutput(`${threadType}s`, '');
     }
   }
 

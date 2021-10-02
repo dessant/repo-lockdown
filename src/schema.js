@@ -1,36 +1,40 @@
 const Joi = require('joi');
 
-const extendedJoi = Joi.extend({
-  type: 'stringList',
-  base: Joi.array(),
-  coerce: {
-    from: 'string',
-    method(value) {
-      value = value.trim();
-      if (value) {
-        value = value
-          .split(',')
-          .map(item => item.trim())
-          .filter(Boolean);
-      }
+const extendedJoi = Joi.extend(joi => {
+  return {
+    type: 'stringList',
+    base: joi.array(),
+    coerce: {
+      from: 'string',
+      method(value) {
+        value = value.trim();
+        if (value) {
+          value = value
+            .split(',')
+            .map(item => item.trim())
+            .filter(Boolean);
+        }
 
-      return {value};
-    }
-  }
-}).extend({
-  type: 'processOnly',
-  base: Joi.string(),
-  coerce: {
-    from: 'string',
-    method(value) {
-      value = value.trim();
-      if (['issues', 'prs'].includes(value)) {
-        value = value.slice(0, -1);
+        return {value};
       }
-
-      return {value};
     }
-  }
+  };
+}).extend(joi => {
+  return {
+    type: 'processOnly',
+    base: joi.string(),
+    coerce: {
+      from: 'string',
+      method(value) {
+        value = value.trim();
+        if (['issues', 'prs'].includes(value)) {
+          value = value.slice(0, -1);
+        }
+
+        return {value};
+      }
+    }
+  };
 });
 
 const schema = Joi.object({
@@ -160,7 +164,12 @@ const schema = Joi.object({
     .valid('resolved', 'off-topic', 'too heated', 'spam', '')
     .default('resolved'),
 
-  'process-only': extendedJoi.processOnly().valid('issue', 'pr', '').default('')
+  'process-only': extendedJoi
+    .processOnly()
+    .valid('issue', 'pr', '')
+    .default(''),
+
+  'log-output': Joi.boolean().default(false)
 });
 
 module.exports = schema;

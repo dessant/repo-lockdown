@@ -56,6 +56,9 @@ inputs:
   process-only:
     description: 'Process only issues or pull requests, value must be either `issues` or `prs`'
     default: ''
+  log-output:
+    description: 'Log output parameters, value must be either `true` or `false`'
+    default: false
 outputs:
   issues:
     description: 'Issues that have been closed or locked, value is a JSON string'

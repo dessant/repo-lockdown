@@ -17,7 +17,7 @@ please consider contributing with
 
 ## Usage
 
-Create a `lockdown.yml` workflow file in the `.github/workflows` directory,
+Create the `lockdown.yml` workflow file in the `.github/workflows` directory,
 use one of the [example workflows](#examples) to get started.
 
 ### Inputs
@@ -34,7 +34,7 @@ The action can be configured using [input parameters](https://docs.github.com/en
     value must follow ISO 8601
   - Optional, defaults to `''`
 - **`exclude-issue-labels`**
-  - Do not process issues with these labels, value must be
+  - Do not process issues with any of these labels, value must be
     a comma separated list of labels
   - Optional, defaults to `''`
 - **`issue-labels`**
@@ -63,7 +63,7 @@ The action can be configured using [input parameters](https://docs.github.com/en
     value must follow ISO 8601
   - Optional, defaults to `''`
 - **`exclude-pr-labels`**
-  - Do not process pull requests with these labels, value must be
+  - Do not process pull requests with any of these labels, value must be
     a comma separated list of labels
   - Optional, defaults to `''`
 - **`pr-labels`**
@@ -91,6 +91,9 @@ The action can be configured using [input parameters](https://docs.github.com/en
   - Process only issues or pull requests, value must be
     either `issues` or `prs`
   - Optional, defaults to `''`
+- **`log-output`**
+  - Log output parameters, value must be either `true` or `false`
+  - Optional, defaults to `false`
 
 ### Outputs
 
@@ -98,9 +101,11 @@ The action can be configured using [input parameters](https://docs.github.com/en
 - **`issues`**
   - Issues that have been closed or locked, value is a JSON string
     in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
+  - Defaults to `''`
 - **`prs`**
   - Pull requests that have been closed or locked, value is a JSON string
     in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
+  - Defaults to `''`
 
 ## Examples
 
@@ -190,6 +195,7 @@ jobs:
           lock-pr: true
           pr-lock-reason: ''
           process-only: ''
+          log-output: false
 ```
 
 ### Excluding issues and pull requests
