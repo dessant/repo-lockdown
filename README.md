@@ -133,7 +133,7 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
 ```
 
 Scheduled runs are no longer needed once the initial backlog
@@ -175,7 +175,7 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
         with:
           github-token: ${{ github.token }}
           exclude-issue-created-before: ''
@@ -206,7 +206,7 @@ before 2018, or those with the `pinned` or `help-wanted` labels applied.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
         with:
           exclude-issue-created-before: '2018-01-01T00:00:00Z'
           exclude-issue-labels: 'pinned, help-wanted'
@@ -219,7 +219,7 @@ with the `pinned` label applied.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
         with:
           exclude-pr-labels: 'pinned'
           lock-pr: false
@@ -234,7 +234,7 @@ closing and locking them, and will apply the `off-topic` label to issues.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
         with:
           issue-labels: 'off-topic'
           issue-comment: >
@@ -259,7 +259,7 @@ that have already been closed before locking them.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
         with:
           issue-comment: >
             This repository does not accept bug reports,
@@ -286,7 +286,7 @@ using the `github-token` input parameter.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v2
+      - uses: dessant/repo-lockdown@v3
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 ```
