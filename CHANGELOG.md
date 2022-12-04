@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/dessant/repo-lockdown/compare/v2.2.0...v3.0.0) (2022-12-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* the action now requires Node.js 16
+
+### Bug Fixes
+
+* update dependencies ([9fec478](https://github.com/dessant/repo-lockdown/commit/9fec478f081baafa0dae332313e9f1c4ecca2380))
+* update docs ([8a91b34](https://github.com/dessant/repo-lockdown/commit/8a91b347dcec33941174711120a8991ed2d483be))
+
 ## [2.2.0](https://github.com/dessant/repo-lockdown/compare/v2.1.2...v2.2.0) (2021-10-02)
 
 
