@@ -147,6 +147,7 @@ class App {
 
       if (labels) {
         core.debug(`Labeling (${threadType}: ${thread.number})`);
+
         await this.client.rest.issues.addLabels({
           ...issue,
           labels
@@ -155,23 +156,18 @@ class App {
 
       if (close && thread.state === 'open') {
         core.debug(`Closing (${threadType}: ${thread.number})`);
+
         await this.client.rest.issues.update({...issue, state: 'closed'});
       }
 
       if (lock && !thread.locked) {
         core.debug(`Locking (${threadType}: ${thread.number})`);
-        let params;
+
+        const params = {...issue};
         if (lockReason) {
-          params = {
-            ...issue,
-            lock_reason: lockReason,
-            headers: {
-              accept: 'application/vnd.github.sailor-v-preview+json'
-            }
-          };
-        } else {
-          params = issue;
+          params.lock_reason = lockReason;
         }
+
         await this.client.rest.issues.lock(params);
       }
 
@@ -210,10 +206,7 @@ class App {
           q: query + ' is:open',
           sort: 'updated',
           order: 'desc',
-          per_page: 50,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
+          per_page: 50
         })
       ).data.items;
 
@@ -242,24 +235,13 @@ class App {
   async ensureUnlock(issue, lock, action) {
     if (lock.active) {
       if (!lock.hasOwnProperty('reason')) {
-        const {data: issueData} = await this.client.rest.issues.get({
-          ...issue,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
-        });
+        const {data: issueData} = await this.client.rest.issues.get(issue);
         lock.reason = issueData.active_lock_reason;
       }
       await this.client.rest.issues.unlock(issue);
       await action();
       if (lock.reason) {
-        issue = {
-          ...issue,
-          lock_reason: lock.reason,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
-        };
+        issue = {...issue, lock_reason: lock.reason};
       }
       await this.client.rest.issues.lock(issue);
     } else {
