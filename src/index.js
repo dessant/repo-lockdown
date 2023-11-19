@@ -171,7 +171,7 @@ class App {
         await this.client.rest.issues.lock(params);
       }
 
-      processedThreads.push({...repo, number: thread.number});
+      processedThreads.push(issue);
     }
 
     return processedThreads;

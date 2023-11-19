@@ -99,12 +99,12 @@ The action can be configured using [input parameters](https://docs.github.com/en
 
 <!-- prettier-ignore -->
 - **`issues`**
-  - Issues that have been closed or locked, value is a JSON string
-    in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
+  - Issues that have been processed, value is a JSON string in
+    the form of `[{"owner": "actions", "repo": "toolkit", "issue_number": 1}]`
   - Defaults to `''`
 - **`prs`**
-  - Pull requests that have been closed or locked, value is a JSON string
-    in the form of `[{"owner": "actions", "repo": "toolkit", "number": 1}]`
+  - Pull requests that have been processed, value is a JSON string in
+    the form of `[{"owner": "actions", "repo": "toolkit", "issue_number": 1}]`
   - Defaults to `''`
 
 ## Examples
