@@ -1,8 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const uniqBy = require('lodash.uniqby');
+import core from '@actions/core';
+import github from '@actions/github';
+import uniqBy from 'lodash.uniqby';
 
-const schema = require('./schema');
+import {getConfig} from './utils.js';
 
 async function run() {
   try {
@@ -270,19 +270,6 @@ class App {
   getISOTimestamp(date) {
     return date.toISOString().split('.')[0] + 'Z';
   }
-}
-
-function getConfig() {
-  const input = Object.fromEntries(
-    Object.keys(schema.describe().keys).map(item => [item, core.getInput(item)])
-  );
-
-  const {error, value} = schema.validate(input, {abortEarly: false});
-  if (error) {
-    throw error;
-  }
-
-  return value;
 }
 
 run();
