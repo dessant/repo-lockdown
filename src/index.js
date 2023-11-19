@@ -238,12 +238,24 @@ class App {
         const {data: issueData} = await this.client.rest.issues.get(issue);
         lock.reason = issueData.active_lock_reason;
       }
+
       await this.client.rest.issues.unlock(issue);
-      await action();
+
+      let actionError;
+      try {
+        await action();
+      } catch (err) {
+        actionError = err;
+      }
+
       if (lock.reason) {
         issue = {...issue, lock_reason: lock.reason};
       }
       await this.client.rest.issues.lock(issue);
+
+      if (actionError) {
+        throw actionError;
+      }
     } else {
       await action();
     }
