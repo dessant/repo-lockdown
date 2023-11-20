@@ -1,6 +1,27 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [4.0.0](https://github.com/dessant/repo-lockdown/compare/v3.0.0...v4.0.0) (2023-11-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* the `number` property in action outputs
+has been renamed to `issue_number`
+* the action now requires Node.js 20
+
+### Features
+
+* set issue close reason ([02c0328](https://github.com/dessant/repo-lockdown/commit/02c03288708ebca8592eeaa9ec490a44925a6583))
+
+
+### Bug Fixes
+
+* restore lock state on error ([936b793](https://github.com/dessant/repo-lockdown/commit/936b7936f7612201731b08852cd178d8b11051ed))
+* retry and throttle GitHub API requests ([1d47349](https://github.com/dessant/repo-lockdown/commit/1d47349e582edb4ef2739d1591ab08493a4a048e))
+* update action outputs ([ebbea5d](https://github.com/dessant/repo-lockdown/commit/ebbea5dfbb3d37d6bf3e15780220b6536c3d28fe))
+* update dependencies ([344fee5](https://github.com/dessant/repo-lockdown/commit/344fee535f6aa8476140704dd7977533b8ae2cfe))
 
 ## [3.0.0](https://github.com/dessant/repo-lockdown/compare/v2.2.0...v3.0.0) (2022-12-04)
 
