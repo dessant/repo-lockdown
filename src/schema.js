@@ -19,48 +19,63 @@ const extendedJoi = Joi.extend(joi => {
       }
     }
   };
-}).extend(joi => {
-  return {
-    type: 'processOnly',
-    base: joi.string(),
-    coerce: {
-      from: 'string',
-      method(value) {
-        value = value.trim();
-        if (['issues', 'prs'].includes(value)) {
-          value = value.slice(0, -1);
-        }
+})
+  .extend(joi => {
+    return {
+      type: 'processOnly',
+      base: joi.string(),
+      coerce: {
+        from: 'string',
+        method(value) {
+          value = value.trim();
+          if (['issues', 'prs'].includes(value)) {
+            value = value.slice(0, -1);
+          }
 
-        return {value};
+          return {value};
+        }
       }
-    }
-  };
-});
+    };
+  })
+  .extend(joi => {
+    return {
+      type: 'closeReason',
+      base: joi.string(),
+      coerce: {
+        from: 'string',
+        method(value, helpers) {
+          value = value.trim();
+          if (value === 'not planned') {
+            value = 'not_planned';
+          }
+
+          return {value};
+        }
+      }
+    };
+  });
+
+const joiDate = Joi.alternatives().try(
+  Joi.date().iso().min('1970-01-01T00:00:00Z').max('2970-12-31T23:59:59Z'),
+  Joi.string().trim().valid('')
+);
+
+const joiLabels = Joi.alternatives().try(
+  extendedJoi
+    .stringList()
+    .items(Joi.string().trim().max(50))
+    .min(1)
+    .max(30)
+    .unique(),
+  Joi.string().trim().valid('')
+);
 
 const schema = Joi.object({
   'github-token': Joi.string().trim().max(100),
 
-  'exclude-issue-created-before': Joi.alternatives()
-    .try(
-      Joi.date()
-        // .iso()
-        .min('1970-01-01T00:00:00Z')
-        .max('2970-12-31T23:59:59Z'),
-      Joi.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-issue-created-before': joiDate.default(''),
 
-  'exclude-issue-labels': Joi.alternatives()
-    .try(
-      extendedJoi
-        .stringList()
-        .items(Joi.string().trim().max(50))
-        .min(1)
-        .max(30)
-        .unique(),
-      Joi.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-issue-labels': joiLabels.default(''),
 
   'issue-labels': Joi.alternatives()
     .try(
@@ -86,6 +101,11 @@ const schema = Joi.object({
       )
     ),
 
+  'issue-close-reason': extendedJoi
+    .closeReason()
+    .valid('completed', 'not_planned')
+    .default('not planned'),
+
   'lock-issue': Joi.boolean()
     .when('close-issue', {
       is: Joi.boolean().valid(false),
@@ -102,27 +122,9 @@ const schema = Joi.object({
     .valid('resolved', 'off-topic', 'too heated', 'spam', '')
     .default('resolved'),
 
-  'exclude-pr-created-before': Joi.alternatives()
-    .try(
-      Joi.date()
-        // .iso()
-        .min('1970-01-01T00:00:00Z')
-        .max('2970-12-31T23:59:59Z'),
-      Joi.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-pr-created-before': joiDate.default(''),
 
-  'exclude-pr-labels': Joi.alternatives()
-    .try(
-      extendedJoi
-        .stringList()
-        .items(Joi.string().trim().max(50))
-        .min(1)
-        .max(30)
-        .unique(),
-      Joi.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-pr-labels': joiLabels.default(''),
 
   'pr-labels': Joi.alternatives()
     .try(
@@ -156,7 +158,7 @@ const schema = Joi.object({
     .default(true)
     .error(
       new Error(
-        '"lock-pr" must be a boolean, either "pr-close" or "lock-pr" must be "true"'
+        '"lock-pr" must be a boolean, either "close-pr" or "lock-pr" must be "true"'
       )
     ),
 

@@ -51,6 +51,10 @@ The action can be configured using [input parameters](https://docs.github.com/en
 - **`close-issue`**
   - Close issues, value must be either `true` or `false`
   - Optional, defaults to `true`
+- **`issue-close-reason`**
+  - Reason for closing an issue, value must be
+    either `completed` or `not planned`
+  - Optional, defaults to `not planned`
 - **`lock-issue`**
   - Lock issues, value must be either `true` or `false`
   - Optional, defaults to `true`
@@ -99,11 +103,11 @@ The action can be configured using [input parameters](https://docs.github.com/en
 
 <!-- prettier-ignore -->
 - **`issues`**
-  - Issues that have been processed, value is a JSON string in
+  - Issues that have been closed or locked, value is a JSON string in
     the form of `[{"owner": "actions", "repo": "toolkit", "issue_number": 1}]`
   - Defaults to `''`
 - **`prs`**
-  - Pull requests that have been processed, value is a JSON string in
+  - Pull requests that have been closed or locked, value is a JSON string in
     the form of `[{"owner": "actions", "repo": "toolkit", "issue_number": 1}]`
   - Defaults to `''`
 
@@ -184,6 +188,7 @@ jobs:
           issue-comment: ''
           skip-closed-issue-comment: false
           close-issue: true
+          issue-close-reason: 'not planned'
           lock-issue: true
           issue-lock-reason: ''
           exclude-pr-created-before: ''

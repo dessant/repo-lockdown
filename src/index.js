@@ -93,6 +93,7 @@ class App {
     const close = this.config[`close-${threadType}`];
     const lock = this.config[`lock-${threadType}`];
     const lockReason = this.config[`${threadType}-lock-reason`];
+    const closeReason = this.config['issue-close-reason'];
 
     const processedThreads = [];
 
@@ -157,7 +158,11 @@ class App {
       if (close && thread.state === 'open') {
         core.debug(`Closing (${threadType}: ${thread.number})`);
 
-        await this.client.rest.issues.update({...issue, state: 'closed'});
+        await this.client.rest.issues.update({
+          ...issue,
+          state: 'closed',
+          state_reason: closeReason
+        });
       }
 
       if (lock && !thread.locked) {
