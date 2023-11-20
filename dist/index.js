@@ -49549,48 +49549,63 @@ const extendedJoi = lib.extend(joi => {
       }
     }
   };
-}).extend(joi => {
-  return {
-    type: 'processOnly',
-    base: joi.string(),
-    coerce: {
-      from: 'string',
-      method(value) {
-        value = value.trim();
-        if (['issues', 'prs'].includes(value)) {
-          value = value.slice(0, -1);
-        }
+})
+  .extend(joi => {
+    return {
+      type: 'processOnly',
+      base: joi.string(),
+      coerce: {
+        from: 'string',
+        method(value) {
+          value = value.trim();
+          if (['issues', 'prs'].includes(value)) {
+            value = value.slice(0, -1);
+          }
 
-        return {value};
+          return {value};
+        }
       }
-    }
-  };
-});
+    };
+  })
+  .extend(joi => {
+    return {
+      type: 'closeReason',
+      base: joi.string(),
+      coerce: {
+        from: 'string',
+        method(value, helpers) {
+          value = value.trim();
+          if (value === 'not planned') {
+            value = 'not_planned';
+          }
+
+          return {value};
+        }
+      }
+    };
+  });
+
+const joiDate = lib.alternatives().try(
+  lib.date().iso().min('1970-01-01T00:00:00Z').max('2970-12-31T23:59:59Z'),
+  lib.string().trim().valid('')
+);
+
+const joiLabels = lib.alternatives().try(
+  extendedJoi
+    .stringList()
+    .items(lib.string().trim().max(50))
+    .min(1)
+    .max(30)
+    .unique(),
+  lib.string().trim().valid('')
+);
 
 const schema = lib.object({
   'github-token': lib.string().trim().max(100),
 
-  'exclude-issue-created-before': lib.alternatives()
-    .try(
-      lib.date()
-        // .iso()
-        .min('1970-01-01T00:00:00Z')
-        .max('2970-12-31T23:59:59Z'),
-      lib.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-issue-created-before': joiDate.default(''),
 
-  'exclude-issue-labels': lib.alternatives()
-    .try(
-      extendedJoi
-        .stringList()
-        .items(lib.string().trim().max(50))
-        .min(1)
-        .max(30)
-        .unique(),
-      lib.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-issue-labels': joiLabels.default(''),
 
   'issue-labels': lib.alternatives()
     .try(
@@ -49616,6 +49631,11 @@ const schema = lib.object({
       )
     ),
 
+  'issue-close-reason': extendedJoi
+    .closeReason()
+    .valid('completed', 'not_planned')
+    .default('not planned'),
+
   'lock-issue': lib.boolean()
     .when('close-issue', {
       is: lib.boolean().valid(false),
@@ -49632,27 +49652,9 @@ const schema = lib.object({
     .valid('resolved', 'off-topic', 'too heated', 'spam', '')
     .default('resolved'),
 
-  'exclude-pr-created-before': lib.alternatives()
-    .try(
-      lib.date()
-        // .iso()
-        .min('1970-01-01T00:00:00Z')
-        .max('2970-12-31T23:59:59Z'),
-      lib.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-pr-created-before': joiDate.default(''),
 
-  'exclude-pr-labels': lib.alternatives()
-    .try(
-      extendedJoi
-        .stringList()
-        .items(lib.string().trim().max(50))
-        .min(1)
-        .max(30)
-        .unique(),
-      lib.string().trim().valid('')
-    )
-    .default(''),
+  'exclude-pr-labels': joiLabels.default(''),
 
   'pr-labels': lib.alternatives()
     .try(
@@ -49686,7 +49688,7 @@ const schema = lib.object({
     .default(true)
     .error(
       new Error(
-        '"lock-pr" must be a boolean, either "pr-close" or "lock-pr" must be "true"'
+        '"lock-pr" must be a boolean, either "close-pr" or "lock-pr" must be "true"'
       )
     ),
 
@@ -49854,6 +49856,7 @@ class App {
     const close = this.config[`close-${threadType}`];
     const lock = this.config[`lock-${threadType}`];
     const lockReason = this.config[`${threadType}-lock-reason`];
+    const closeReason = this.config['issue-close-reason'];
 
     const processedThreads = [];
 
@@ -49908,6 +49911,7 @@ class App {
 
       if (labels) {
         core.debug(`Labeling (${threadType}: ${thread.number})`);
+
         await this.client.rest.issues.addLabels({
           ...issue,
           labels
@@ -49916,27 +49920,26 @@ class App {
 
       if (close && thread.state === 'open') {
         core.debug(`Closing (${threadType}: ${thread.number})`);
-        await this.client.rest.issues.update({...issue, state: 'closed'});
+
+        await this.client.rest.issues.update({
+          ...issue,
+          state: 'closed',
+          state_reason: closeReason
+        });
       }
 
       if (lock && !thread.locked) {
         core.debug(`Locking (${threadType}: ${thread.number})`);
-        let params;
+
+        const params = {...issue};
         if (lockReason) {
-          params = {
-            ...issue,
-            lock_reason: lockReason,
-            headers: {
-              accept: 'application/vnd.github.sailor-v-preview+json'
-            }
-          };
-        } else {
-          params = issue;
+          params.lock_reason = lockReason;
         }
+
         await this.client.rest.issues.lock(params);
       }
 
-      processedThreads.push({...repo, number: thread.number});
+      processedThreads.push(issue);
     }
 
     return processedThreads;
@@ -49971,10 +49974,7 @@ class App {
           q: query + ' is:open',
           sort: 'updated',
           order: 'desc',
-          per_page: 50,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
+          per_page: 50
         })
       ).data.items;
 
@@ -50003,26 +50003,27 @@ class App {
   async ensureUnlock(issue, lock, action) {
     if (lock.active) {
       if (!lock.hasOwnProperty('reason')) {
-        const {data: issueData} = await this.client.rest.issues.get({
-          ...issue,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
-        });
+        const {data: issueData} = await this.client.rest.issues.get(issue);
         lock.reason = issueData.active_lock_reason;
       }
+
       await this.client.rest.issues.unlock(issue);
-      await action();
+
+      let actionError;
+      try {
+        await action();
+      } catch (err) {
+        actionError = err;
+      }
+
       if (lock.reason) {
-        issue = {
-          ...issue,
-          lock_reason: lock.reason,
-          headers: {
-            Accept: 'application/vnd.github.sailor-v-preview+json'
-          }
-        };
+        issue = {...issue, lock_reason: lock.reason};
       }
       await this.client.rest.issues.lock(issue);
+
+      if (actionError) {
+        throw actionError;
+      }
     } else {
       await action();
     }
