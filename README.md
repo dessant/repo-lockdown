@@ -22,7 +22,7 @@ directory, use one of the [example workflows](#examples) to get started.
 
 ### Inputs
 
-The action can be configured using [input parameters](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepswith).
+The action can be configured using [input parameters](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepswith).
 
 <!-- prettier-ignore -->
 - **`github-token`**
@@ -137,7 +137,7 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
 ```
 
 Scheduled runs are no longer needed once the initial backlog
@@ -179,7 +179,7 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
         with:
           github-token: ${{ github.token }}
           exclude-issue-created-before: ''
@@ -211,7 +211,7 @@ before 2018, or those with the `pinned` or `help-wanted` labels applied.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
         with:
           exclude-issue-created-before: '2018-01-01T00:00:00Z'
           exclude-issue-labels: 'pinned, help-wanted'
@@ -224,7 +224,7 @@ with the `pinned` label applied.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
         with:
           exclude-pr-labels: 'pinned'
           lock-pr: false
@@ -239,7 +239,7 @@ closing and locking them, and will apply the `off-topic` label to issues.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
         with:
           issue-labels: 'off-topic'
           issue-comment: >
@@ -264,7 +264,7 @@ that have already been closed before locking them.
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
         with:
           issue-comment: >
             This repository does not accept bug reports,
@@ -283,15 +283,15 @@ You may also authenticate with a personal access token to perform actions
 as a GitHub user instead of the `github-actions` app.
 
 Create a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
-with the `repo` or `public_repo` scopes enabled, and add the token as an
-[encrypted secret](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository)
+with the `repo` or `public_repo` scopes enabled, and add the token as a
+[secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-a-repository)
 for the repository or organization, then provide the action with the secret
 using the `github-token` input parameter.
 
 <!-- prettier-ignore -->
 ```yaml
     steps:
-      - uses: dessant/repo-lockdown@v4
+      - uses: dessant/repo-lockdown@v5
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 ```
@@ -304,7 +304,7 @@ it will take a few hours or days to process them all.
 
 ## License
 
-Copyright (c) 2019-2023 Armin Sebastian
+Copyright (c) 2019-2025 Armin Sebastian
 
 This software is released under the terms of the MIT License.
 See the [LICENSE](LICENSE) file for further information.
