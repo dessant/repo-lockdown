@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [5.0.0](https://github.com/dessant/repo-lockdown/compare/v4.0.0...v5.0.0) (2025-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* the action now requires Node.js 24
+
+### Bug Fixes
+
+* update dependencies ([58d00ac](https://github.com/dessant/repo-lockdown/commit/58d00aca64794563c58ee7deb7fe182ee688ab57))
+
 ## [4.0.0](https://github.com/dessant/repo-lockdown/compare/v3.0.0...v4.0.0) (2023-11-20)
 
 
