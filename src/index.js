@@ -1,5 +1,5 @@
-import core from '@actions/core';
-import github from '@actions/github';
+import {debug, info, setFailed, setOutput, warning} from '@actions/core';
+import {context} from '@actions/github';
 import uniqBy from 'lodash.uniqby';
 
 import {getConfig, getClient} from './utils.js';
@@ -10,13 +10,13 @@ async function run() {
     const client = getClient(config['github-token']);
 
     const app = new App(config, client);
-    if (github.context.eventName === 'schedule') {
+    if (['schedule', 'workflow_dispatch'].includes(context.eventName)) {
       await app.processBacklog();
     } else {
       await app.processNewThread();
     }
   } catch (err) {
-    core.setFailed(err);
+    setFailed(err);
   }
 }
 
@@ -35,22 +35,22 @@ class App {
     for (const threadType of threadTypes) {
       const threads = await this.lockdown({threadType});
 
-      core.debug(`Setting output (${threadType}s)`);
+      debug(`Setting output (${threadType}s)`);
       if (threads.length) {
         threadsFound = true;
-        core.setOutput(`${threadType}s`, JSON.stringify(threads));
+        setOutput(`${threadType}s`, JSON.stringify(threads));
 
         if (logOutput) {
-          core.info(`Output (${threadType}s)`);
-          core.info(JSON.stringify(threads, null, 2));
+          info(`Output (${threadType}s)`);
+          info(JSON.stringify(threads, null, 2));
         }
       } else {
-        core.setOutput(`${threadType}s`, '');
+        setOutput(`${threadType}s`, '');
       }
     }
 
     if (!threadsFound) {
-      core.warning(
+      warning(
         'All issues and pull requests have been processed. Remove the `schedule` event from the workflow file to avoid unnecessary workflow runs in the future.'
       );
     }
@@ -58,7 +58,7 @@ class App {
 
   async processNewThread() {
     const logOutput = this.config['log-output'];
-    const threadType = github.context.eventName === 'issues' ? 'issue' : 'pr';
+    const threadType = context.eventName === 'issues' ? 'issue' : 'pr';
 
     const processOnly = this.config['process-only'];
     if (processOnly && processOnly !== threadType) {
@@ -67,25 +67,24 @@ class App {
 
     const threads = await this.lockdown({
       threadType,
-      threadData:
-        github.context.payload.issue || github.context.payload.pull_request
+      threadData: context.payload.issue || context.payload.pull_request
     });
 
-    core.debug(`Setting output (${threadType}s)`);
+    debug(`Setting output (${threadType}s)`);
     if (threads.length) {
-      core.setOutput(`${threadType}s`, JSON.stringify(threads));
+      setOutput(`${threadType}s`, JSON.stringify(threads));
 
       if (logOutput) {
-        core.info(`Output (${threadType}s)`);
-        core.info(JSON.stringify(threads, null, 2));
+        info(`Output (${threadType}s)`);
+        info(JSON.stringify(threads, null, 2));
       }
     } else {
-      core.setOutput(`${threadType}s`, '');
+      setOutput(`${threadType}s`, '');
     }
   }
 
   async lockdown({threadType = '', threadData = null} = {}) {
-    const repo = github.context.repo;
+    const repo = context.repo;
 
     const labels = this.config[`${threadType}-labels`];
     const comment = this.config[`${threadType}-comment`];
@@ -126,7 +125,7 @@ class App {
       const issue = {...repo, issue_number: thread.number};
 
       if (comment && (thread.state === 'open' || !skipClosedComment)) {
-        core.debug(`Commenting (${threadType}: ${thread.number})`);
+        debug(`Commenting (${threadType}: ${thread.number})`);
 
         await this.ensureUnlock(
           issue,
@@ -147,7 +146,7 @@ class App {
       }
 
       if (labels) {
-        core.debug(`Labeling (${threadType}: ${thread.number})`);
+        debug(`Labeling (${threadType}: ${thread.number})`);
 
         await this.client.rest.issues.addLabels({
           ...issue,
@@ -156,7 +155,7 @@ class App {
       }
 
       if (close && thread.state === 'open') {
-        core.debug(`Closing (${threadType}: ${thread.number})`);
+        debug(`Closing (${threadType}: ${thread.number})`);
 
         await this.client.rest.issues.update({
           ...issue,
@@ -166,7 +165,7 @@ class App {
       }
 
       if (lock && !thread.locked) {
-        core.debug(`Locking (${threadType}: ${thread.number})`);
+        debug(`Locking (${threadType}: ${thread.number})`);
 
         const params = {...issue};
         if (lockReason) {
@@ -183,7 +182,7 @@ class App {
   }
 
   async searchBacklog(threadType) {
-    const {owner, repo} = github.context.repo;
+    const {owner, repo} = context.repo;
     let query = `repo:${owner}/${repo} is:${threadType}`;
 
     const excludeCreatedBefore =
@@ -200,7 +199,7 @@ class App {
       query += ` ${queryPart}`;
     }
 
-    core.debug(`Searching (${threadType}s)`);
+    debug(`Searching (${threadType}s)`);
 
     const results = [];
 
