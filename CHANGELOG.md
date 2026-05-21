@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [5.0.1](https://github.com/dessant/repo-lockdown/compare/v5.0.0...v5.0.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* update dependencies ([3310abc](https://github.com/dessant/repo-lockdown/commit/3310abcc436607ba18ec6b1652e9fa59116d9e88))
+
 ## [5.0.0](https://github.com/dessant/repo-lockdown/compare/v4.0.0...v5.0.0) (2025-12-15)
 
 
