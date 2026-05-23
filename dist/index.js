@@ -57315,7 +57315,7 @@ const joiLabels = joi_lib.alternatives().try(
 );
 
 const schema = joi_lib.object({
-  'github-token': joi_lib.string().trim().max(100),
+  'github-token': joi_lib.string().trim().max(1000),
 
   'exclude-issue-created-before': joiDate.default(''),
 
